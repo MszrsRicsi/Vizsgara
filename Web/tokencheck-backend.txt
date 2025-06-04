@@ -1,0 +1,18 @@
+function tokenCheck(req, res, next){
+    const authHeader = req.header('Authorization');
+    
+    if (!authHeader)
+    {
+        return sendMessage(res, 401, false, "Jelentkezz be!");
+    }
+
+    try
+    {
+        req.user = verifyToken(authHeader.split(' ')[1]);
+        next();
+    }
+    catch
+    {
+        return sendMessage(res, 401, false, "Hibás authentikáció!");
+    }
+}
