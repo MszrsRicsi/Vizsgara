@@ -1,0 +1,101 @@
+dbClass db = new dbClass("localhost", "root", "", "12a_afacalc");
+
+
+
+
+        public void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            DataGridTextColumn c0 = new DataGridTextColumn();
+            c0.Header = "ID";
+            c0.Binding = new Binding("id");
+            c0.Width = 40;
+            dataGrid1.Columns.Add(c0);
+            DataGridTextColumn c1 = new DataGridTextColumn();
+            c1.Header = "Rendszám";
+            c1.Binding = new Binding("vehiclePlate");
+            c1.MinWidth = 100;
+            dataGrid1.Columns.Add(c1);
+            DataGridTextColumn c2 = new DataGridTextColumn();
+            c2.Header = "Típus";
+            c2.Binding = new Binding("vehicleType");
+            c2.MinWidth = 150;
+            dataGrid1.Columns.Add(c2);
+            DataGridTextColumn c3 = new DataGridTextColumn();
+            c3.Header = "Üzemanyag";
+            c3.Binding = new Binding("vehicleFuelType");
+            c3.MinWidth = 150;
+            dataGrid1.Columns.Add(c3);
+            DataGridTextColumn c4 = new DataGridTextColumn();
+            c4.Header = "Dátum";
+            c4.Binding = new Binding("datum");
+            c4.MinWidth = 100;
+            dataGrid1.Columns.Add(c4);
+        }
+
+
+
+
+public void UpdateGrid()
+        {
+            dataGrid1.Items.Clear();
+            db.selectAll("data");
+
+            if (db.results == null)
+            {
+                MessageBox.Show("Nincs adatbázis kapcsolat!");
+            }
+            else
+            {
+                while (db.results.Read())
+                {
+                    dataGrid1.Items.Add(new DataItem()
+                    {
+                        id = db.results.GetInt32("id").ToString(),
+                        tipus = db.results.GetString("tipus"),
+                        szszam = db.results.GetString("szamlaszam"),
+                        pnev = db.results.GetString("partnernev"),
+                        datum = db.results.GetString("datum").Substring(0, 13),
+                        netto = db.results.GetDouble("netto").ToString() + " Ft",
+                        brutto = db.results.GetDouble("brutto").ToString() + " Ft",
+                        afa = db.results.GetFloat("afa").ToString() + "%"
+                    });
+                }
+
+                UpdateStats();
+            }
+        }
+
+
+
+        internal class DataItem
+        {
+            public string id { get; set; }
+            public string tipus { get; set; }
+            public string szszam { get; set; }
+            public string pnev { get; set; }
+            public string datum { get; set; }
+            public string netto { get; set; }
+            public string brutto { get; set; }
+            public string afa { get; set; }
+        }
+
+
+
+
+string[] fields = { "tipus", "szamlaszam", "partnernev", "datum" };
+string[] values = { tipus_CBOX.Text, szamlaszam_TBOX.Text, partnernev_TBOX.Text, datum_DTP.ToString() };
+
+db.insert("data", fields, values);
+if (db.AffectedRows == -1)
+{
+	MessageBox.Show("Hiba történt a művelet során!");
+	if (db.debug)
+        {
+         	MessageBox.Show(db.msg);
+        }
+}
+else
+{
+	MessageBox.Show("Adat hozzáadva!");
+	UpdateGrid();
+}
